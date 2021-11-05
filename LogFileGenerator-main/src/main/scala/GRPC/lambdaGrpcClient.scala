@@ -8,8 +8,8 @@ import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
 
-object lambdaGrpcClient {
-  private[this] val logger = Logger.getLogger(classOf[lambdaGrpcClient].getName)
+object LambdaGrpcClient {
+  private[this] val logger = Logger.getLogger(classOf[LambdaGrpcClient].getName)
 
   val user_config: Config = ConfigFactory.load("lambdaJson.conf")
 
@@ -28,14 +28,14 @@ object lambdaGrpcClient {
    * @param port port given in parameters.conf
    * @return
    */
-  def apply(host: String, port: Int): lambdaGrpcClient = {
+  def apply(host: String, port: Int): LambdaGrpcClient = {
     val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build
     val blockingStub = GreeterGrpc.blockingStub(channel)
-    new lambdaGrpcClient(channel, blockingStub)
+    new LambdaGrpcClient(channel, blockingStub)
   }
 
   def main(args: Array[String]): Unit = {
-    val client = lambdaGrpcClient("localhost", port)
+    val client = LambdaGrpcClient("localhost", port)
     try {
       client.callServer(bucket, key, timestamp, interval, pattern)
     }
@@ -45,8 +45,8 @@ object lambdaGrpcClient {
   }
 }
 
-class lambdaGrpcClient private(private val channel: ManagedChannel, private val blockingStub: GreeterBlockingStub) {
-  private[this] val logger = Logger.getLogger(classOf[lambdaGrpcClient].getName)
+class LambdaGrpcClient private(private val channel: ManagedChannel, private val blockingStub: GreeterBlockingStub) {
+  private[this] val logger = Logger.getLogger(classOf[LambdaGrpcClient].getName)
 
   def stop(): Unit = {
     channel.shutdown.awaitTermination(5, TimeUnit.SECONDS)
@@ -62,7 +62,7 @@ class lambdaGrpcClient private(private val channel: ManagedChannel, private val 
     try{
       val response = blockingStub.findLog(request)
       logger.info("Result= " + response.result)
-      response.result
+      //response.result
     }
     catch {
       case e:StatusRuntimeException =>

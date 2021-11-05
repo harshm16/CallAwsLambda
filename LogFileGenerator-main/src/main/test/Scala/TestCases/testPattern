@@ -1,0 +1,13 @@
+import com.typesafe.config.{Config, ConfigFactory}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
+class testPattern extends AnyFlatSpec with Matchers {
+  val config: Config = ConfigFactory.load("lambdaJson")
+
+  behavior of "Check if pattern is a String"
+
+  it should "obtain a string" in {
+    config.getString("lambdaJson.Pattern") shouldBe a [String]
+  }
+}

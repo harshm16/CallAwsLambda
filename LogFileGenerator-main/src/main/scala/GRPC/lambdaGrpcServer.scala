@@ -5,7 +5,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.grpc.examples.helloworld.logAnalysis.GreeterGrpc.GreeterBlockingStub
 import io.grpc.examples.helloworld.logAnalysis.{GreeterGrpc, LambdaRequest, LambdaReply}
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, Server, ServerBuilder, StatusRuntimeException}
-
+import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
 import scala.concurrent.{ExecutionContext, Future}
@@ -15,37 +15,37 @@ import scala.util.{Failure, Success, Try}
  * Implements the Log Function gRPC service.
  */
 
-object lambdaGrpcServer {
+object LambdaGrpcServer {
 
-  private val logger = Logger.getLogger(classOf[lambdaGrpcServer].getName)
+  private val logger = Logger.getLogger(classOf[LambdaGrpcServer].getName)
   val user_config: Config = ConfigFactory.load("lambdaJson.conf")
 
   val port: Int = user_config.getInt("lambdaJson.port")
 
   val url: String = user_config.getString("lambdaJson.url")
   def main(args: Array[String]): Unit = {
-    val server = new lambdaGrpcServer(ExecutionContext.global)
+    val server = new LambdaGrpcServer(ExecutionContext.global)
     startServer(server)
     blockServerUntilShutdown(server)
   }
 
-  def startServer(server: lambdaGrpcServer): Unit = {
+  def startServer(server: LambdaGrpcServer): Unit = {
     server.start()
   }
 
-  def blockServerUntilShutdown(server: lambdaGrpcServer): Unit =  {
+  def blockServerUntilShutdown(server: LambdaGrpcServer): Unit =  {
     server.blockUntilShutdown()
   }
 }
 
-class lambdaGrpcServer(executionContext: ExecutionContext) {
+class LambdaGrpcServer(executionContext: ExecutionContext) {
   self =>
   private[this] var server: Server = null
-  private val logger = Logger.getLogger(classOf[lambdaGrpcServer].getName)
+  private val logger = Logger.getLogger(classOf[LambdaGrpcServer].getName)
 
   private def start(): Unit = {
-    server = ServerBuilder.forPort(lambdaGrpcServer.port).addService(GreeterGrpc.bindService(new Logimpl, executionContext)).build.start
-    logger.info("Server started, listening on " + lambdaGrpcServer.port)
+    server = ServerBuilder.forPort(LambdaGrpcServer.port).addService(GreeterGrpc.bindService(new Logimpl, executionContext)).build.start
+    logger.info("Server started, listening on " + LambdaGrpcServer.port)
     sys.addShutdownHook {
       System.err.println("shutting down gRPC server since JVM is shutting down")
       self.stop()
@@ -69,7 +69,7 @@ class lambdaGrpcServer(executionContext: ExecutionContext) {
     override def findLog(req: LambdaRequest): Future[LambdaReply] = {
       //Call Lambda API Gateway
 
-      Try(scala.io.Source.fromURL(lambdaGrpcServer.url + "/grpc?bucket=" + req.bucket + "&key=" + req.key + "&timestamp=" + req.timestamp + "&interval=" + req.interval + "&pattern=" + req.pattern)) match {
+      Try(scala.io.Source.fromURL(LambdaGrpcServer.url + "?bucket=" + URLEncoder.encode(req.bucket, "UTF-8") + "&key=" + URLEncoder.encode(req.key, "UTF-8") + "&timestamp=" + URLEncoder.encode(req.timestamp, "UTF-8") + "&interaval=" + URLEncoder.encode(req.interval, "UTF-8") + "&pattern=" + URLEncoder.encode(req.pattern, "UTF-8"))) match {
         case Success(response) => {
           val output_string = response.mkString
           val reply = LambdaReply(result = output_string)
@@ -77,7 +77,7 @@ class lambdaGrpcServer(executionContext: ExecutionContext) {
           Future.successful(reply)
         }
         case Failure(response) => {
-          val output_string = "Timestamp not found"
+          val output_string = "Couldn't connect to AWS, please verify your Inputs"
           val reply = LambdaReply(result = output_string)
           Future.successful(reply)
         }
