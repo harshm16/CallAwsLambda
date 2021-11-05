@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_package = "io.grpc.examples.helloworld";
+
+
+service Greeter {
+  rpc FindLog (LambdaRequest) returns (LambdaReply) {}
+}
+
+// The request message containing the user's name.
+message LambdaRequest {
+  string bucket = 1;
+  string key = 2;
+  string timestamp = 3;
+  string interval = 4;
+  string pattern = 5;
+}
+
+message LambdaReply {
+  string result = 1;
+}
