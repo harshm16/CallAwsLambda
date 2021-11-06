@@ -55,6 +55,7 @@ runMain GRPC.LambdaGrpcClient
 #### Possible response codes:
 ##### 200 : Timestamp found in the logfile.
 ##### 400 : Timestamp not present in the logfile.
+##### 402 : Timestamp found, but No matching pattern found in the given interval.
 
 #### As seen in the above message, the status of the AWS request is different from the response_code that is returned by the AWS Lambda function.
 #### I opted not to change the status of the Request as a whole and only return the response code based on the success/failure of event.
@@ -67,11 +68,11 @@ runMain GRPC.LambdaGrpcClient
 #### ii) Separate out the current implementation into different Lambda functions, for eg. One reads user input and calls another lambda function which implements Binary search.
 
 
-### Link to references:
-### The repo which has additional code to sent the generated logfile to the specified AWS S3 bucket. [https://github.com/harshm16/logfiletoS3](https://github.com/harshm16/logfiletoS3)
-### Creating an EC2 instance and SSHing to it. [https://youtu.be/Nv_1u8gCkIQ](https://youtu.be/Nv_1u8gCkIQ)
-### To send files from EC2 to S3 bucket. [https://faun.pub/write-files-from-ec2-to-s3-in-aws-programmatically-716d1a4ef639]()
-### Follow [this youtube video](https://youtu.be/7hKY9Qi3gQU) where I have explained the flow of the project.
+### Links:
+#### The repo which has additional code to sent the generated logfile to the specified AWS S3 bucket. [https://github.com/harshm16/logfiletoS3](https://github.com/harshm16/logfiletoS3)
+#### Creating an EC2 instance and SSHing to it. [https://youtu.be/Nv_1u8gCkIQ](https://youtu.be/Nv_1u8gCkIQ)
+#### To send files from EC2 to S3 bucket. [https://faun.pub/write-files-from-ec2-to-s3-in-aws-programmatically-716d1a4ef639]()
+#### Follow [this youtube video](https://youtu.be/7hKY9Qi3gQU) where I have explained the flow of the project.
 
 ### Some observations / recommendations:
 #### i) Scala 3 doesn't support the use of Akka. When I tried importing Akka or any library which included http, from scala 3 or above, it coerced the version http_3 into the import string, thus leading to failure in importing.  
